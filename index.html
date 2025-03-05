@@ -13,6 +13,9 @@
         background-color: #121212;
         color: #e0e0e0;
       }
+      h1 {
+        text-align: center;
+      }
       form,
       .charts-section,
       table,
@@ -104,8 +107,48 @@
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        margin-bottom: 20px;
         font-size: 0.9em;
+        flex: 1;
+      }
+      /* Currency Calculator styles */
+      #currency-calculator {
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        font-size: 0.9em;
+        flex: 1;
+      }
+      /* Save/Load Data styles */
+      #save-load {
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        font-size: 0.9em;
+        flex: 1;
+      }
+      /* Advanced Filter styles */
+      #advanced-filter {
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        font-size: 0.9em;
+        flex: 1;
+        display: none; /* Collapsed by default */
+      }
+      /* Flex container for top header */
+      #top-header {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      /* Flex container for top controls */
+      #top-controls {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
       }
       /* Flex layout for charts */
       #charts-container {
@@ -141,100 +184,135 @@
   <body>
     <h1>Expense Tracker</h1>
 
-    <!-- Exchange Rates Section with tooltip -->
-    <div
-      id="exchange-rates"
-      title="These exchange rates are in relation to SAR. For example, if 1 USD equals 3.75 SAR, then to convert USD to SAR simply multiply by 3.75."
-    >
-      Loading exchange rates...
-    </div>
-
-    <!-- Expense Input Form with tooltip -->
-    <form
-      id="expense-form"
-      title="Enter your expense details here. You can also add a new custom category using the field below."
-    >
-      <!-- Hidden field to store index when editing -->
-      <input type="hidden" id="expense-index" />
-      <label
-        >Date:
-        <input type="date" id="expense-date" required />
-      </label>
-      <label
-        >Category:
-        <select id="expense-category" required></select>
-      </label>
-      <label
-        >Description:
-        <input type="text" id="expense-description" placeholder="Optional" />
-      </label>
-      <label
-        >Amount:
-        <input type="number" id="expense-amount" step="0.01" required />
-      </label>
-      <button type="submit" id="submit-btn">Add Expense</button>
-      <div id="new-category-container">
-        <label
-          >New Category:
-          <input
-            type="text"
-            id="new-category"
-            placeholder="Enter new category"
-          />
-          <button type="button" id="add-category-btn" class="add-cat-btn">
-            Add Category
-          </button>
-        </label>
+    <!-- Top Header: Exchange Rates and Expense Input Form side by side -->
+    <div id="top-header">
+      <!-- Exchange Rates Section with tooltip -->
+      <div
+        id="exchange-rates"
+        title="These exchange rates are in relation to SAR. For example, 1 USD = X SAR."
+      >
+        Loading exchange rates...
       </div>
-    </form>
-
-    <!-- Save / Load Data Section with description and tooltip -->
-    <div
-      class="data-section"
-      title="Save your expenses (and custom categories) to a file or load them from a file."
-    >
-      <h2>Save / Load Data</h2>
-      <p style="font-size: 0.9em; color: #ccc">
-        Save your expense data to a file or load data from an existing file.
-        This file contains all your expense records and any custom categories
-        you've added.
-      </p>
-      <button id="save-btn">Save to File</button>
-      <input type="file" id="load-file" accept=".txt,.json" />
+      <!-- Expense Input Form with tooltip -->
+      <div style="flex: 1">
+        <form
+          id="expense-form"
+          title="Enter your expense details here. You can also add a new custom category using the field below."
+        >
+          <!-- Hidden field to store index when editing -->
+          <input type="hidden" id="expense-index" />
+          <label
+            >Date:
+            <input type="date" id="expense-date" required />
+          </label>
+          <label
+            >Category:
+            <select id="expense-category" required></select>
+          </label>
+          <label
+            >Description:
+            <input
+              type="text"
+              id="expense-description"
+              placeholder="Optional"
+            />
+          </label>
+          <label
+            >Amount:
+            <input type="number" id="expense-amount" step="0.01" required />
+          </label>
+          <button type="submit" id="submit-btn">Add Expense</button>
+          <div id="new-category-container">
+            <label
+              >New Category:
+              <input
+                type="text"
+                id="new-category"
+                placeholder="Enter new category"
+              />
+              <button type="button" id="add-category-btn" class="add-cat-btn">
+                Add Category
+              </button>
+            </label>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <!-- Advanced Filter Section with tooltip -->
-    <div
-      id="filter-section"
-      class="data-section"
-      title="Use these filters to narrow down your expense records by date, category, or amount."
-    >
-      <h2>Advanced Filter</h2>
-      <form id="filter-form">
-        <label
-          >From Date:
-          <input type="date" id="filter-from-date" />
-        </label>
-        <label
-          >To Date:
-          <input type="date" id="filter-to-date" />
-        </label>
-        <br />
-        <label>Categories: </label>
-        <div id="filter-category-container"></div>
-        <br />
-        <label
-          >Min Amount:
-          <input type="number" id="filter-min-amount" step="0.01" />
-        </label>
-        <label
-          >Max Amount:
-          <input type="number" id="filter-max-amount" step="0.01" />
-        </label>
-        <br />
-        <button type="submit">Apply Filter</button>
-        <button type="button" id="clear-filter-btn">Clear Filter</button>
-      </form>
+    <!-- Top Controls: Currency Calculator, Save/Load Data, and Advanced Filter arranged horizontally -->
+    <div id="top-controls">
+      <!-- Currency Calculator Tool -->
+      <div
+        id="currency-calculator"
+        title="Convert an amount from USD, EUR, or PLN to SAR using current exchange rates."
+      >
+        <h3>Currency Calculator</h3>
+        <label for="calc-amount">Amount:</label>
+        <input type="number" id="calc-amount" step="0.01" />
+        <label for="calc-currency">Currency:</label>
+        <select id="calc-currency">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="PLN">PLN</option>
+        </select>
+        <button type="button" id="calc-btn">Convert to SAR</button>
+        <span id="calc-result"></span>
+      </div>
+      <!-- Save / Load Data Section -->
+      <div
+        id="save-load"
+        title="Save your expenses and custom categories to a file or load them from a file."
+      >
+        <h2>Save / Load Data</h2>
+        <p style="font-size: 0.9em; color: #ccc">
+          Save your expense data (including custom categories) or load existing
+          data.
+        </p>
+        <button id="save-btn">Save to File</button>
+        <input type="file" id="load-file" accept=".txt,.json" />
+      </div>
+      <!-- Advanced Filter Section (collapsible) -->
+      <div
+        id="advanced-filter"
+        title="Use these filters to narrow down your expense records by date, category, or amount."
+      >
+        <h2>Advanced Filter</h2>
+        <form id="filter-form">
+          <label
+            >From Date:
+            <input type="date" id="filter-from-date" />
+          </label>
+          <label
+            >To Date:
+            <input type="date" id="filter-to-date" />
+          </label>
+          <br />
+          <label>Categories: </label>
+          <div id="filter-category-container"></div>
+          <br />
+          <label
+            >Min Amount:
+            <input type="number" id="filter-min-amount" step="0.01" />
+          </label>
+          <label
+            >Max Amount:
+            <input type="number" id="filter-max-amount" step="0.01" />
+          </label>
+          <br />
+          <button type="submit">Apply Filter</button>
+          <button type="button" id="clear-filter-btn">Clear Filter</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Button to toggle Advanced Filter -->
+    <div style="text-align: center; margin-bottom: 20px">
+      <button
+        id="toggle-filter-btn"
+        title="Click to show or hide the advanced filter options."
+      >
+        Show Advanced Filter
+      </button>
     </div>
 
     <!-- Statistics Section with tooltip -->
@@ -358,6 +436,11 @@
           Other: "rgba(201, 203, 207, 1)",
         };
 
+        // Global variables for exchange rates (in relation to SAR)
+        let usdToSar = null,
+          eurToSar = null,
+          plnToSar = null;
+
         // Object to hold current sort order for each property
         const sortOrders = {
           date: true,
@@ -382,6 +465,12 @@
         const filterCategoryContainer = document.getElementById(
           "filter-category-container"
         );
+        const calcAmountInput = document.getElementById("calc-amount");
+        const calcCurrencySelect = document.getElementById("calc-currency");
+        const calcBtn = document.getElementById("calc-btn");
+        const calcResultSpan = document.getElementById("calc-result");
+        const toggleFilterBtn = document.getElementById("toggle-filter-btn");
+        const advancedFilterDiv = document.getElementById("advanced-filter");
 
         // Set current date as default for expense date input
         document.getElementById("expense-date").value = new Date()
@@ -679,6 +768,20 @@
               .forEach((input) => (input.checked = false));
             updateTable();
           });
+
+        // Toggle Advanced Filter section visibility
+        toggleFilterBtn.addEventListener("click", function () {
+          if (
+            advancedFilterDiv.style.display === "none" ||
+            advancedFilterDiv.style.display === ""
+          ) {
+            advancedFilterDiv.style.display = "block";
+            toggleFilterBtn.textContent = "Hide Advanced Filter";
+          } else {
+            advancedFilterDiv.style.display = "none";
+            toggleFilterBtn.textContent = "Show Advanced Filter";
+          }
+        });
 
         // Update statistics and render statistics charts based on filtered expenses,
         // including extrapolated yearly and monthly projections.
@@ -1108,17 +1211,15 @@
           });
         });
 
-        // Fetch exchange rates in relation to SAR (1 unit of USD, EUR, PLN to SAR)
+        // Fetch exchange rates (using USD as base) and convert to show conversion to SAR.
         fetch("https://api.exchangerate-api.com/v4/latest/USD")
           .then((response) => response.json())
           .then((data) => {
             const rates = data.rates;
-            // If base is USD, then 1 USD = rates["SAR"] SAR.
-            // For EUR and PLN, compute: 1 EUR = (rates["SAR"] / rates["EUR"]) SAR, 1 PLN = (rates["SAR"] / rates["PLN"]) SAR.
             if (rates["SAR"] && rates["EUR"] && rates["PLN"]) {
-              const usdToSar = rates["SAR"];
-              const eurToSar = rates["SAR"] / rates["EUR"];
-              const plnToSar = rates["SAR"] / rates["PLN"];
+              usdToSar = rates["SAR"];
+              eurToSar = rates["SAR"] / rates["EUR"];
+              plnToSar = rates["SAR"] / rates["PLN"];
               document.getElementById(
                 "exchange-rates"
               ).textContent = `Exchange Rates (to SAR): 1 USD = ${usdToSar.toFixed(
@@ -1135,6 +1236,25 @@
             document.getElementById("exchange-rates").textContent =
               "Error fetching exchange rates.";
           });
+
+        // Currency Calculator event
+        calcBtn.addEventListener("click", function () {
+          const amount = parseFloat(calcAmountInput.value);
+          const currency = calcCurrencySelect.value;
+          if (isNaN(amount)) {
+            calcResultSpan.textContent = " Please enter a valid amount.";
+            return;
+          }
+          let result = 0;
+          if (currency === "USD") {
+            result = amount * usdToSar;
+          } else if (currency === "EUR") {
+            result = amount * eurToSar;
+          } else if (currency === "PLN") {
+            result = amount * plnToSar;
+          }
+          calcResultSpan.textContent = " = SAR " + formatAmount(result);
+        });
       });
     </script>
   </body>
