@@ -98,6 +98,15 @@
       #filter-category-container {
         margin-top: 5px;
       }
+      /* Exchange rates section */
+      #exchange-rates {
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        margin-bottom: 20px;
+        font-size: 0.9em;
+      }
       /* Flex layout for charts */
       #charts-container {
         display: flex;
@@ -130,6 +139,16 @@
     </style>
   </head>
   <body>
+    <h1>Expense Tracker</h1>
+
+    <!-- Exchange Rates Section with tooltip -->
+    <div
+      id="exchange-rates"
+      title="These exchange rates are in relation to SAR. For example, if 1 USD equals 3.75 SAR, then to convert USD to SAR simply multiply by 3.75."
+    >
+      Loading exchange rates...
+    </div>
+
     <!-- Expense Input Form with tooltip -->
     <form
       id="expense-form"
@@ -222,7 +241,7 @@
     <div
       id="stats-section"
       class="data-section"
-      title="View statistics about your expenses including totals, averages, and extrapolated projections."
+      title="View statistics about your expenses including totals, averages, extrapolated projections, and visual charts."
     >
       <h2>Statistics</h2>
       <div id="stats-container"></div>
@@ -339,7 +358,7 @@
           Other: "rgba(201, 203, 207, 1)",
         };
 
-        // Object to hold current sort order for each property (true = ascending, false = descending)
+        // Object to hold current sort order for each property
         const sortOrders = {
           date: true,
           category: true,
@@ -623,7 +642,6 @@
               try {
                 const data = JSON.parse(e.target.result);
                 if (Array.isArray(data)) {
-                  // Backward compatibility: file contains only expenses array
                   expenses = data;
                   customCategories = [];
                 } else if (data.expenses && data.customCategories) {
@@ -975,6 +993,7 @@
           if (expenseChart) {
             expenseChart.destroy();
           }
+
           expenseChart = new Chart(chartCanvas, {
             type: "bar",
             data: {
@@ -1088,6 +1107,34 @@
             });
           });
         });
+
+        // Fetch exchange rates in relation to SAR (1 unit of USD, EUR, PLN to SAR)
+        fetch("https://api.exchangerate-api.com/v4/latest/USD")
+          .then((response) => response.json())
+          .then((data) => {
+            const rates = data.rates;
+            // If base is USD, then 1 USD = rates["SAR"] SAR.
+            // For EUR and PLN, compute: 1 EUR = (rates["SAR"] / rates["EUR"]) SAR, 1 PLN = (rates["SAR"] / rates["PLN"]) SAR.
+            if (rates["SAR"] && rates["EUR"] && rates["PLN"]) {
+              const usdToSar = rates["SAR"];
+              const eurToSar = rates["SAR"] / rates["EUR"];
+              const plnToSar = rates["SAR"] / rates["PLN"];
+              document.getElementById(
+                "exchange-rates"
+              ).textContent = `Exchange Rates (to SAR): 1 USD = ${usdToSar.toFixed(
+                3
+              )} SAR, 1 EUR = ${eurToSar.toFixed(
+                3
+              )} SAR, 1 PLN = ${plnToSar.toFixed(3)} SAR`;
+            } else {
+              document.getElementById("exchange-rates").textContent =
+                "Exchange rates not available.";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("exchange-rates").textContent =
+              "Error fetching exchange rates.";
+          });
       });
     </script>
   </body>
