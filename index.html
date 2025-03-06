@@ -138,17 +138,24 @@
         flex: 1;
         display: none; /* Collapsed by default */
       }
-      /* Flex container for top header */
-      #top-header {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      /* Flex container for top controls */
+      /* Flex containers for top sections */
+      #top-header,
       #top-controls {
         display: flex;
         gap: 20px;
         margin-bottom: 20px;
+      }
+      /* Statistics text container arranged in 3 columns */
+      #stats-text {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      #stats-text > div {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
       }
       /* Flex layout for charts */
       #charts-container {
@@ -315,15 +322,16 @@
       </button>
     </div>
 
-    <!-- Statistics Section with tooltip -->
+    <!-- Statistics Section with horizontal text columns and charts below -->
     <div
       id="stats-section"
       class="data-section"
-      title="View statistics about your expenses including totals, averages, extrapolated projections, and visual charts."
+      title="View statistics about your expenses including totals, averages, and extrapolated projections."
     >
       <h2>Statistics</h2>
+      <!-- Statistics text arranged in three horizontal columns -->
       <div id="stats-container"></div>
-      <!-- Container for statistics charts -->
+      <!-- Container for statistics charts arranged horizontally -->
       <div id="stats-charts">
         <div>
           <canvas id="monthly-chart"></canvas>
@@ -783,8 +791,8 @@
           }
         });
 
-        // Update statistics and render statistics charts based on filtered expenses,
-        // including extrapolated yearly and monthly projections.
+        // Update statistics and render statistics charts based on filtered expenses.
+        // Also, arrange the statistics text in three horizontal columns.
         function updateStats() {
           const filtered = filterExpenses();
           const statsContainer = document.getElementById("stats-container");
@@ -810,46 +818,8 @@
             uniqueDays > 0 ? (365 / uniqueDays) * total : 0;
           const projectedMonthly = projectedYearly / 12;
 
-          // Group by month
-          const monthGroups = {};
-          filtered.forEach((exp) => {
-            const month = new Date(exp.date).toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            });
-            if (!monthGroups[month]) monthGroups[month] = [];
-            monthGroups[month].push(exp);
-          });
-          let monthStatsHtml = "<ul>";
-          for (const month in monthGroups) {
-            const arr = monthGroups[month];
-            const monthTotal = arr.reduce((sum, exp) => sum + exp.amount, 0);
-            const monthAvg = monthTotal / arr.length;
-            monthStatsHtml += `<li>${month}: Total = SAR ${formatAmount(
-              monthTotal
-            )}, Average = SAR ${formatAmount(monthAvg)}</li>`;
-          }
-          monthStatsHtml += "</ul>";
-
-          // Group by category
-          const catGroups = {};
-          filtered.forEach((exp) => {
-            const cat = exp.category;
-            if (!catGroups[cat]) catGroups[cat] = [];
-            catGroups[cat].push(exp);
-          });
-          let catStatsHtml = "<ul>";
-          for (const cat in catGroups) {
-            const arr = catGroups[cat];
-            const catTotal = arr.reduce((sum, exp) => sum + exp.amount, 0);
-            const catAvg = catTotal / arr.length;
-            catStatsHtml += `<li>${cat}: Total = SAR ${formatAmount(
-              catTotal
-            )}, Average = SAR ${formatAmount(catAvg)}</li>`;
-          }
-          catStatsHtml += "</ul>";
-
-          const overallHtml = `
+          // Build overall statistics text
+          const overallStatsHtml = `
           <p><strong>Total Expenses:</strong> SAR ${formatAmount(total)}</p>
           <p><strong>Number of Expenses:</strong> ${count}</p>
           <p><strong>Average Expense:</strong> SAR ${formatAmount(avg)}</p>
@@ -860,12 +830,53 @@
           <p><strong>Projected Monthly Expense:</strong> SAR ${formatAmount(
             projectedMonthly
           )}</p>
-          <h3>By Month</h3>
-          ${monthStatsHtml}
-          <h3>By Category</h3>
-          ${catStatsHtml}
         `;
-          statsContainer.innerHTML = overallHtml;
+
+          // Build By Month list
+          let monthListHtml = "<ul>";
+          const monthGroups = {};
+          filtered.forEach((exp) => {
+            const month = new Date(exp.date).toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            });
+            if (!monthGroups[month]) monthGroups[month] = [];
+            monthGroups[month].push(exp);
+          });
+          for (const month in monthGroups) {
+            const arr = monthGroups[month];
+            const monthTotal = arr.reduce((sum, exp) => sum + exp.amount, 0);
+            const monthAvg = monthTotal / arr.length;
+            monthListHtml += `<li>${month}: Total = SAR ${formatAmount(
+              monthTotal
+            )}, Average = SAR ${formatAmount(monthAvg)}</li>`;
+          }
+          monthListHtml += "</ul>";
+
+          // Build By Category list
+          let catListHtml = "<ul>";
+          const catGroups = {};
+          filtered.forEach((exp) => {
+            const cat = exp.category;
+            if (!catGroups[cat]) catGroups[cat] = [];
+            catGroups[cat].push(exp);
+          });
+          for (const cat in catGroups) {
+            const arr = catGroups[cat];
+            const catTotal = arr.reduce((sum, exp) => sum + exp.amount, 0);
+            const catAvg = catTotal / arr.length;
+            catListHtml += `<li>${cat}: Total = SAR ${formatAmount(
+              catTotal
+            )}, Average = SAR ${formatAmount(catAvg)}</li>`;
+          }
+          catListHtml += "</ul>";
+
+          const statsHtml = `
+          <div style="flex: 1; padding: 10px;">${overallStatsHtml}</div>
+          <div style="flex: 1; padding: 10px;"><h3>By Month</h3>${monthListHtml}</div>
+          <div style="flex: 1; padding: 10px;"><h3>By Category</h3>${catListHtml}</div>
+        `;
+          statsContainer.innerHTML = `<div id="stats-text" style="display: flex; gap: 20px;">${statsHtml}</div>`;
 
           // --- Render Monthly Totals Bar Chart ---
           let monthLabels = Object.keys(monthGroups);
@@ -1069,7 +1080,6 @@
             alert("No expenses to analyze.");
             return;
           }
-
           chartsContainer.style.display = "flex";
 
           const days = Array.from(
@@ -1096,7 +1106,6 @@
           if (expenseChart) {
             expenseChart.destroy();
           }
-
           expenseChart = new Chart(chartCanvas, {
             type: "bar",
             data: {
@@ -1211,7 +1220,7 @@
           });
         });
 
-        // Fetch exchange rates (using USD as base) and convert to show conversion to SAR.
+        // Fetch exchange rates (using USD as base) and convert to SAR values.
         fetch("https://api.exchangerate-api.com/v4/latest/USD")
           .then((response) => response.json())
           .then((data) => {
