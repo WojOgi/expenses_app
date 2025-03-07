@@ -6,12 +6,12 @@
     <!-- Chart.js is loaded from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      /* Dark theme styles */
+      /* Updated Lighter Dark Theme */
       body {
         font-family: Arial, sans-serif;
         margin: 20px;
-        background-color: #121212;
-        color: #e0e0e0;
+        background-color: #2c2c2c; /* lighter dark gray */
+        color: #f0f0f0;
       }
       h1 {
         text-align: center;
@@ -20,7 +20,7 @@
       .charts-section,
       table,
       .data-section {
-        background-color: #1e1e1e;
+        background-color: #3a3a3a; /* slightly lighter panels */
         padding: 15px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -29,10 +29,10 @@
       input,
       select,
       button {
-        background-color: #333;
+        background-color: #555;
         border: none;
         padding: 8px;
-        color: #e0e0e0;
+        color: #f0f0f0;
         border-radius: 4px;
         margin-right: 5px;
         margin-bottom: 5px;
@@ -40,10 +40,10 @@
       input:focus,
       select:focus {
         outline: none;
-        border: 1px solid #555;
+        border: 1px solid #777;
       }
       button:hover {
-        background-color: #444;
+        background-color: #666;
         cursor: pointer;
       }
       table {
@@ -53,12 +53,12 @@
       }
       th,
       td {
-        border: 1px solid #444;
+        border: 1px solid #777;
         padding: 10px;
         text-align: left;
       }
       th {
-        background-color: #333;
+        background-color: #555;
       }
       th.sortable {
         cursor: pointer;
@@ -103,7 +103,7 @@
       }
       /* Exchange rates section */
       #exchange-rates {
-        background-color: #1e1e1e;
+        background-color: #3a3a3a;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -112,7 +112,7 @@
       }
       /* Currency Calculator styles */
       #currency-calculator {
-        background-color: #1e1e1e;
+        background-color: #3a3a3a;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -121,7 +121,7 @@
       }
       /* Save/Load Data styles */
       #save-load {
-        background-color: #1e1e1e;
+        background-color: #3a3a3a;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -130,7 +130,7 @@
       }
       /* Advanced Filter styles */
       #advanced-filter {
-        background-color: #1e1e1e;
+        background-color: #3a3a3a;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -154,7 +154,7 @@
       #stats-text > div {
         flex: 1;
         padding: 10px;
-        border: 1px solid #444;
+        border: 1px solid #777;
         border-radius: 8px;
       }
       /* Flex layout for charts */
@@ -185,6 +185,10 @@
       #stats-charts > div {
         flex: 1;
         min-width: 300px;
+      }
+      /* Expenses table container for collapsible functionality */
+      #expenses-table-container {
+        margin-bottom: 20px;
       }
     </style>
   </head>
@@ -326,7 +330,7 @@
     <div
       id="stats-section"
       class="data-section"
-      title="View statistics about your expenses including totals, averages, projected daily, monthly, and yearly expenses."
+      title="View statistics about your expenses including totals, averages, and projections."
     >
       <h2>Statistics</h2>
       <!-- Statistics text arranged in three horizontal columns -->
@@ -369,10 +373,21 @@
       </div>
     </div>
 
-    <!-- Expense Table with tooltip -->
+    <!-- Button to toggle Expenses Table (placed below charts) -->
+    <div style="text-align: center; margin-bottom: 20px">
+      <button
+        id="toggle-expenses-btn"
+        title="Click to show or hide the expenses table."
+      >
+        Hide Expenses
+      </button>
+    </div>
+
+    <!-- Expenses Table (collapsible) -->
     <div
       class="data-section"
       title="This table displays all your expenses. Click on the column headers to sort the data."
+      id="expenses-table-container"
     >
       <h2>Expenses</h2>
       <table id="expense-table">
@@ -479,6 +494,9 @@
         const calcResultSpan = document.getElementById("calc-result");
         const toggleFilterBtn = document.getElementById("toggle-filter-btn");
         const advancedFilterDiv = document.getElementById("advanced-filter");
+        const toggleExpensesBtn = document.getElementById(
+          "toggle-expenses-btn"
+        );
 
         // Set current date as default for expense date input
         document.getElementById("expense-date").value = new Date()
@@ -791,8 +809,24 @@
           }
         });
 
+        // Toggle Expenses Table visibility using computed style for accurate check on first click
+        toggleExpensesBtn.addEventListener("click", function () {
+          const tableContainer = document.getElementById(
+            "expenses-table-container"
+          );
+          const currentDisplay =
+            window.getComputedStyle(tableContainer).display;
+          if (currentDisplay === "none") {
+            tableContainer.style.display = "block";
+            toggleExpensesBtn.textContent = "Hide Expenses";
+          } else {
+            tableContainer.style.display = "none";
+            toggleExpensesBtn.textContent = "Show Expenses";
+          }
+        });
+
         // Update statistics and render statistics charts based on filtered expenses.
-        // Also arrange statistics text in three horizontal columns.
+        // Arrange statistics text in three horizontal columns.
         function updateStats() {
           const filtered = filterExpenses();
           const statsContainer = document.getElementById("stats-container");
@@ -819,7 +853,7 @@
           const projectedMonthly = projectedYearly / 12;
           const projectedDaily = uniqueDays > 0 ? total / uniqueDays : 0;
 
-          // Build overall statistics text (including projected daily expense)
+          // Build overall statistics text (including Projected Daily Expense)
           const overallStatsHtml = `
           <p><strong>Total Expenses:</strong> SAR ${formatAmount(total)}</p>
           <p><strong>Number of Expenses:</strong> ${count}</p>
@@ -877,7 +911,6 @@
           }
           catListHtml += "</ul>";
 
-          // Combine into three horizontal columns
           const statsHtml = `
           <div style="flex: 1; padding: 10px;">${overallStatsHtml}</div>
           <div style="flex: 1; padding: 10px;"><h3>By Month</h3>${monthListHtml}</div>
@@ -917,29 +950,29 @@
                 title: {
                   display: true,
                   text: "Total Expenses by Month",
-                  color: "#e0e0e0",
+                  color: "#f0f0f0",
                   font: { size: 18 },
                 },
                 legend: {
-                  labels: { color: "#e0e0e0", font: { size: 14 } },
+                  labels: { color: "#f0f0f0", font: { size: 14 } },
                 },
               },
               scales: {
                 x: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Month",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
                 y: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Total Expense (SAR)",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
@@ -982,29 +1015,29 @@
                 title: {
                   display: true,
                   text: "Total Expenses by Category",
-                  color: "#e0e0e0",
+                  color: "#f0f0f0",
                   font: { size: 18 },
                 },
                 legend: {
-                  labels: { color: "#e0e0e0", font: { size: 14 } },
+                  labels: { color: "#f0f0f0", font: { size: 14 } },
                 },
               },
               scales: {
                 x: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Category",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
                 y: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Total Expense (SAR)",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
@@ -1050,29 +1083,29 @@
                 title: {
                   display: true,
                   text: "Monthly Averages by Category (SAR)",
-                  color: "#e0e0e0",
+                  color: "#f0f0f0",
                   font: { size: 18 },
                 },
                 legend: {
-                  labels: { color: "#e0e0e0", font: { size: 14 } },
+                  labels: { color: "#f0f0f0", font: { size: 14 } },
                 },
               },
               scales: {
                 x: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Month",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
                 y: {
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                   title: {
                     display: true,
                     text: "Average Expense (SAR)",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
                 },
@@ -1123,11 +1156,11 @@
                 title: {
                   display: true,
                   text: "Expenses by Day and Category",
-                  color: "#e0e0e0",
+                  color: "#f0f0f0",
                   font: { size: 18 },
                 },
                 legend: {
-                  labels: { color: "#e0e0e0", font: { size: 14 } },
+                  labels: { color: "#f0f0f0", font: { size: 14 } },
                 },
               },
               scales: {
@@ -1136,20 +1169,20 @@
                   title: {
                     display: true,
                     text: "Date",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                 },
                 y: {
                   stacked: true,
                   title: {
                     display: true,
                     text: "Amount (SAR)",
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 14 },
                   },
-                  ticks: { color: "#e0e0e0", font: { size: 12 } },
+                  ticks: { color: "#f0f0f0", font: { size: 12 } },
                 },
               },
             },
@@ -1209,11 +1242,11 @@
                   title: {
                     display: true,
                     text: "Expense Breakdown for " + month,
-                    color: "#e0e0e0",
+                    color: "#f0f0f0",
                     font: { size: 18 },
                   },
                   legend: {
-                    labels: { color: "#e0e0e0", font: { size: 14 } },
+                    labels: { color: "#f0f0f0", font: { size: 14 } },
                   },
                 },
               },
@@ -1228,8 +1261,8 @@
             const rates = data.rates;
             if (rates["SAR"] && rates["EUR"] && rates["PLN"]) {
               usdToSar = rates["SAR"]; // 1 USD = rates["SAR"] SAR
-              eurToSar = rates["SAR"] / rates["EUR"]; // 1 EUR = (rates["SAR"] / rates["EUR"]) SAR
-              plnToSar = rates["SAR"] / rates["PLN"]; // 1 PLN = (rates["SAR"] / rates["PLN"]) SAR
+              eurToSar = rates["SAR"] / rates["EUR"]; // 1 EUR = (rates["SAR"]/rates["EUR"]) SAR
+              plnToSar = rates["SAR"] / rates["PLN"]; // 1 PLN = (rates["SAR"]/rates["PLN"]) SAR
               document.getElementById(
                 "exchange-rates"
               ).textContent = `Exchange Rates (to SAR): 1 USD = ${usdToSar.toFixed(
