@@ -326,7 +326,7 @@
     <div
       id="stats-section"
       class="data-section"
-      title="View statistics about your expenses including totals, averages, and extrapolated projections."
+      title="View statistics about your expenses including totals, averages, projected daily, monthly, and yearly expenses."
     >
       <h2>Statistics</h2>
       <!-- Statistics text arranged in three horizontal columns -->
@@ -792,7 +792,7 @@
         });
 
         // Update statistics and render statistics charts based on filtered expenses.
-        // Also, arrange the statistics text in three horizontal columns.
+        // Also arrange statistics text in three horizontal columns.
         function updateStats() {
           const filtered = filterExpenses();
           const statsContainer = document.getElementById("stats-container");
@@ -817,18 +817,24 @@
           const projectedYearly =
             uniqueDays > 0 ? (365 / uniqueDays) * total : 0;
           const projectedMonthly = projectedYearly / 12;
+          const projectedDaily = uniqueDays > 0 ? total / uniqueDays : 0;
 
-          // Build overall statistics text
+          // Build overall statistics text (including projected daily expense)
           const overallStatsHtml = `
           <p><strong>Total Expenses:</strong> SAR ${formatAmount(total)}</p>
           <p><strong>Number of Expenses:</strong> ${count}</p>
-          <p><strong>Average Expense:</strong> SAR ${formatAmount(avg)}</p>
+          <p><strong>Average Expense (per transaction):</strong> SAR ${formatAmount(
+            avg
+          )}</p>
           <p><strong>Days Tracked:</strong> ${uniqueDays}</p>
-          <p><strong>Projected Yearly Expense:</strong> SAR ${formatAmount(
-            projectedYearly
+          <p><strong>Projected Daily Expense:</strong> SAR ${formatAmount(
+            projectedDaily
           )}</p>
           <p><strong>Projected Monthly Expense:</strong> SAR ${formatAmount(
             projectedMonthly
+          )}</p>
+          <p><strong>Projected Yearly Expense:</strong> SAR ${formatAmount(
+            projectedYearly
           )}</p>
         `;
 
@@ -871,6 +877,7 @@
           }
           catListHtml += "</ul>";
 
+          // Combine into three horizontal columns
           const statsHtml = `
           <div style="flex: 1; padding: 10px;">${overallStatsHtml}</div>
           <div style="flex: 1; padding: 10px;"><h3>By Month</h3>${monthListHtml}</div>
@@ -1081,7 +1088,6 @@
             return;
           }
           chartsContainer.style.display = "flex";
-
           const days = Array.from(
             new Set(expenses.map((exp) => exp.date))
           ).sort();
@@ -1102,7 +1108,6 @@
               borderWidth: 1,
             };
           });
-
           if (expenseChart) {
             expenseChart.destroy();
           }
@@ -1153,7 +1158,6 @@
           const pieChartsSection =
             document.getElementById("pie-charts-section");
           pieChartsSection.innerHTML = "";
-
           const monthGroups = {};
           expenses.forEach((exp) => {
             const monthYear = new Date(exp.date).toLocaleString("default", {
@@ -1165,7 +1169,6 @@
             }
             monthGroups[monthYear].push(exp);
           });
-
           Object.keys(monthGroups).forEach((month) => {
             const categorySums = {};
             monthGroups[month].forEach((exp) => {
@@ -1179,7 +1182,6 @@
             const pieColors = pieLabels.map(
               (label) => categoryColors[label] || "rgba(0,0,0,0.7)"
             );
-
             const pieContainer = document.createElement("div");
             const heading = document.createElement("h3");
             heading.textContent = month;
@@ -1189,7 +1191,6 @@
             canvas.style.height = "300px";
             pieContainer.appendChild(canvas);
             pieChartsSection.appendChild(pieContainer);
-
             new Chart(canvas, {
               type: "pie",
               data: {
@@ -1226,9 +1227,9 @@
           .then((data) => {
             const rates = data.rates;
             if (rates["SAR"] && rates["EUR"] && rates["PLN"]) {
-              usdToSar = rates["SAR"];
-              eurToSar = rates["SAR"] / rates["EUR"];
-              plnToSar = rates["SAR"] / rates["PLN"];
+              usdToSar = rates["SAR"]; // 1 USD = rates["SAR"] SAR
+              eurToSar = rates["SAR"] / rates["EUR"]; // 1 EUR = (rates["SAR"] / rates["EUR"]) SAR
+              plnToSar = rates["SAR"] / rates["PLN"]; // 1 PLN = (rates["SAR"] / rates["PLN"]) SAR
               document.getElementById(
                 "exchange-rates"
               ).textContent = `Exchange Rates (to SAR): 1 USD = ${usdToSar.toFixed(
